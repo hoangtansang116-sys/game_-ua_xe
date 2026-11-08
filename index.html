@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Đua Xe 3D Đơn Giản</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        #controls {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            font-family: sans-serif; color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">Dùng phím Mũi tên (PC) hoặc chạm màn hình (Điện thoại) để điều khiển xe!</div>
+    <script src="https://cloudflare.com"></script>
+    <script>
+        // Khởi tạo Scene, Camera, Renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Ánh sáng
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+
+        // Tạo chiếc xe đơn giản (hình hộp)
+        const geometry = new THREE.BoxGeometry(1, 0.5, 2);
+        const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const car = new THREE.Mesh(geometry, material);
+        scene.add(car);
+
+        // Tạo mặt đường
+        const roadGeo = new THREE.PlaneGeometry(10, 200);
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        const road = new THREE.Mesh(roadGeo, roadMat);
+        road.rotation.x = -Math.PI / 2;
+        scene.add(road);
+
+        camera.position.set(0, 3, 5);
+        camera.lookAt(car.position);
+
+        // Xử lý điều khiển bàn phím (PC)
+        const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false };
+        window.addEventListener('keydown', (e) => { if (keys.hasOwnProperty(e.key)) keys[e.key] = true; });
+        window.addEventListener('keyup', (e) => { if (keys.hasOwnProperty(e.key)) keys[e.key] = false; });
+
+        // Xử lý cảm ứng (Điện thoại)
+        window.addEventListener('touchmove', (e) => {
+            const touchX = e.touches[0].clientX;
+            car.position.x = (touchX / window.innerWidth) * 10 - 5;
+        });
+
+        // Game Loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (keys.ArrowLeft) car.position.x -= 0.1;
+            if (keys.ArrowRight) car.position.x += 0.1;
+            car.position.z -= 0.2; // Xe chạy về phía trước
+
+            camera.position.z = car.position.z + 5;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
